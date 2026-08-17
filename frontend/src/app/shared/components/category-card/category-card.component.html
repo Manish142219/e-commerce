@@ -1,0 +1,13 @@
+<a [routerLink]="['/category', slug]" class="block group cursor-pointer">
+  <div class="overflow-hidden bg-white">
+    <div class="aspect-[3/4] overflow-hidden">
+      <img [src]="imageUrl" [alt]="name"
+           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+    </div>
+    <div class="bg-[#f5f0e8] p-4 text-center">
+      <h3 class="font-bold text-myntra-dark text-sm mb-1">{{ name }}</h3>
+      <p class="font-extrabold text-myntra-dark text-lg mb-1">{{ discountText }}</p>
+      <p class="text-xs text-myntra-gray font-semibold">Shop Now</p>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,78 @@
+<app-header></app-header>
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
+<div class="max-w-[1400px] mx-auto px-4 md:px-10 pb-10">
+  <div class="flex items-baseline gap-2 mb-6">
+    <h1 class="text-xl font-bold text-myntra-dark">{{ category?.name }}</h1>
+    <span class="text-myntra-gray text-sm">- {{ products.length }} items</span>
+  </div>
+
+  <div class="flex gap-6">
+    <!-- Sidebar Filters -->
+    <aside class="w-56 flex-shrink-0 hidden md:block">
+      <h3 class="font-bold text-sm border-b pb-3 mb-4">FILTERS</h3>
+
+      <!-- Brand Filter -->
+      <div class="mb-6" *ngIf="brands.length">
+        <h4 class="font-bold text-xs text-myntra-gray mb-3 uppercase">Brand</h4>
+        <label *ngFor="let brand of brands" class="flex items-center gap-2 mb-2 cursor-pointer text-sm">
+          <input type="radio" name="brand" [value]="brand" [(ngModel)]="selectedBrand" (change)="applyFilters()" />
+          {{ brand }}
+        </label>
+        <label class="flex items-center gap-2 mb-2 cursor-pointer text-sm">
+          <input type="radio" name="brand" value="" [(ngModel)]="selectedBrand" (change)="applyFilters()" />
+          All Brands
+        </label>
+      </div>
+
+      <!-- Price Filter -->
+      <div class="mb-6">
+        <h4 class="font-bold text-xs text-myntra-gray mb-3 uppercase">Price</h4>
+        <input type="range" min="0" max="5000" step="100" [(ngModel)]="maxPrice" (change)="applyFilters()"
+               class="w-full accent-myntra-pink" />
+        <p class="text-xs text-myntra-gray mt-1">₹{{ minPrice }} - ₹{{ maxPrice }}+</p>
+      </div>
+
+      <!-- Color Filter -->
+      <div class="mb-6">
+        <h4 class="font-bold text-xs text-myntra-gray mb-3 uppercase">Color</h4>
+        <label *ngFor="let color of colors" class="flex items-center gap-2 mb-2 cursor-pointer text-sm">
+          <input type="radio" name="color" [value]="color" [(ngModel)]="selectedColor" (change)="applyFilters()" />
+          {{ color }}
+        </label>
+      </div>
+
+      <!-- Discount Filter -->
+      <div class="mb-6">
+        <h4 class="font-bold text-xs text-myntra-gray mb-3 uppercase">Discount Range</h4>
+        <label *ngFor="let disc of discountOptions" class="flex items-center gap-2 mb-2 cursor-pointer text-sm">
+          <input type="radio" name="discount" [value]="disc" [(ngModel)]="minDiscount" (change)="applyFilters()" />
+          {{ disc }}% and above
+        </label>
+      </div>
+    </aside>
+
+    <!-- Product Grid -->
+    <div class="flex-1">
+      <div class="flex justify-end mb-4">
+        <select [(ngModel)]="sortBy" (change)="onSortChange()"
+                class="border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none">
+          <option value="recommended">Sort by: Recommended</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="discount">Better Discount</option>
+        </select>
+      </div>
+
+      <div *ngIf="loading" class="text-center py-20 text-myntra-gray">Loading products...</div>
+
+      <div *ngIf="!loading && products.length === 0" class="text-center py-20 text-myntra-gray">
+        No products found matching your filters.
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+      </div>
+    </div>
+  </div>
+</div>

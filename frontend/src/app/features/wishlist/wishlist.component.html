@@ -1,0 +1,31 @@
+<app-header></app-header>
+
+<div class="max-w-[1400px] mx-auto px-4 md:px-10 py-8">
+  <h1 class="text-2xl font-bold text-myntra-dark mb-6">My Wishlist</h1>
+
+  <div *ngIf="loading" class="text-center py-20 text-myntra-gray">Loading wishlist...</div>
+
+  <div *ngIf="!loading && items.length === 0" class="text-center py-20">
+    <p class="text-myntra-gray mb-4">Your wishlist is empty</p>
+    <a routerLink="/home" class="myntra-btn inline-block">Continue Shopping</a>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div *ngFor="let item of items" class="relative group">
+      <button (click)="removeItem(item.productId)"
+              class="absolute top-2 right-2 z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow hover:text-myntra-pink">
+        &times;
+      </button>
+      <a [routerLink]="['/product', item.productId]" class="block">
+        <img [src]="item.imageUrl" [alt]="item.name" class="w-full aspect-[3/4] object-cover" />
+        <h3 class="font-bold text-sm mt-2">{{ item.brand }}</h3>
+        <p class="text-sm text-myntra-gray">{{ item.name }}</p>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="font-bold text-sm">₹{{ item.price }}</span>
+          <span class="text-xs text-myntra-gray line-through">₹{{ item.mrp }}</span>
+          <span class="text-xs text-myntra-orange">({{ item.discountPercent }}% OFF)</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

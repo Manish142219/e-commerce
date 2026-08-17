@@ -1,0 +1,148 @@
+<app-header></app-header>
+<app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
+<div *ngIf="loading" class="text-center py-20 text-caption">Loading product...</div>
+
+<div *ngIf="product && !loading" class="max-w-[1400px] mx-auto px-4 md:px-10 pb-10">
+  <div class="flex flex-col lg:flex-row gap-10">
+    <!-- Image Gallery -->
+    <div class="lg:w-1/2">
+      <div class="grid grid-cols-2 gap-2">
+        <img [src]="selectedImage" [alt]="product.name"
+             class="col-span-2 w-full aspect-[3/4] object-cover" />
+        <img *ngFor="let img of product.images" [src]="img" [alt]="product.name"
+             (click)="selectedImage = img"
+             class="w-full aspect-square object-cover cursor-pointer border-2"
+             [class.border-brand]="selectedImage === img"
+             [class.border-transparent]="selectedImage !== img" />
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="lg:w-1/2">
+      <h1 class="heading-secondary text-2xl">{{ product.brand }}</h1>
+      <p class="text-subheading mt-1">{{ product.name }}</p>
+
+      <hr class="my-4 border-[var(--color-border)]" />
+
+      <div class="flex items-baseline gap-3">
+        <span class="text-2xl font-bold">₹{{ product.price }}</span>
+        <span class="text-subheading line-through text-lg">MRP ₹{{ product.mrp }}</span>
+        <span class="text-discount font-bold">({{ product.discountPercent }}% OFF)</span>
+      </div>
+      <p class="text-success text-xs font-bold mt-1">inclusive of all taxes</p>
+
+      <hr class="my-6 border-[var(--color-border)]" />
+
+      <!-- Variant Selection (size / quantity / volume based on category) -->
+      <div class="mb-6" *ngIf="product.sizes?.length">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="heading-section">{{ variantLabel }}</span>
+          <a class="text-brand text-sm font-bold cursor-pointer">{{ chartLabel }}</a>
+        </div>
+        <p class="text-caption mb-3" *ngIf="variantType === 'FOOTWEAR'">Choose UK shoe size</p>
+        <p class="text-caption mb-3" *ngIf="variantType === 'BEAUTY'">Choose pack size or volume</p>
+        <p class="text-caption mb-3" *ngIf="variantType === 'ACCESSORY'">Most accessories come in Free Size</p>
+
+        <div class="flex flex-wrap gap-3">
+          <button *ngFor="let size of product.sizes"
+                  (click)="selectSize(size)"
+                  class="border-2 font-bold text-sm transition-colors"
+                  [class.rounded-full]="!isPillVariant"
+                  [class.rounded-sm]="isPillVariant"
+                  [class.w-12]="!isPillVariant"
+                  [class.h-12]="!isPillVariant"
+                  [class.px-4]="isPillVariant"
+                  [class.py-2]="isPillVariant"
+                  [style.border-color]="selectedSize === size ? 'var(--color-primary)' : 'var(--color-border)'"
+                  [style.background-color]="selectedSize === size ? 'var(--color-primary)' : 'transparent'"
+                  [style.color]="selectedSize === size ? 'white' : 'var(--color-text-heading)'">
+            {{ size }}
+          </button>
+        </div>
+        <p *ngIf="messageIsError && message === requiredMessage" class="text-brand text-sm mt-2 font-bold">
+          {{ requiredMessage }}
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-4 mb-4">
+        <button (click)="addToBag()" [disabled]="addingToCart"
+                class="btn-primary flex-1 flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          {{ addingToCart ? 'ADDING...' : 'ADD TO BAG' }}
+        </button>
+        <button (click)="toggleWishlist()" class="btn-outline flex-1 flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" [attr.fill]="isWishlisted ? 'var(--color-primary)' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+          WISHLIST
+        </button>
+      </div>
+
+      <div *ngIf="message && message !== requiredMessage" class="mb-4">
+        <p class="text-sm font-bold" [class.text-success]="!messageIsError" [class.text-brand]="messageIsError">
+          {{ message }}
+        </p>
+        <button *ngIf="!messageIsError && message.includes('bag')" (click)="goToBag()"
+                class="text-brand text-sm font-bold mt-2 underline">
+          Go to Bag →
+        </button>
+      </div>
+
+      <!-- Delivery Options -->
+      <div class="card p-4 mb-6">
+        <div class="flex items-center gap-2 mb-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+          <span class="heading-section">DELIVERY OPTIONS</span>
+        </div>
+
+        <div class="flex items-center gap-2 mb-3">
+          <input type="text" [value]="pincode" readonly class="input-field w-32 bg-[var(--color-bg-page)]" />
+          <span *ngIf="deliveryInfo?.deliverable" class="text-success text-sm">✓</span>
+          <span *ngIf="deliveryInfo && !deliveryInfo.deliverable" class="text-brand text-sm">✗</span>
+          <button (click)="openAddressModal()" class="text-brand text-sm font-bold">CHANGE</button>
+        </div>
+
+        <ul *ngIf="deliveryInfo?.deliverable" class="text-sm text-subheading space-y-2">
+          <li class="flex items-center gap-2">
+            <span>🚚</span> Get it by {{ deliveryInfo?.estimatedDeliveryDate }}
+          </li>
+          <li class="flex items-center gap-2" *ngIf="deliveryInfo?.codAvailable">
+            <span>💵</span> Pay on delivery available
+          </li>
+          <li class="flex items-center gap-2">
+            <span>↩️</span> Easy {{ deliveryInfo?.returnDays }} days return & exchange available
+            <a class="text-brand font-bold cursor-pointer">MORE INFO ></a>
+          </li>
+        </ul>
+
+        <p *ngIf="deliveryInfo && !deliveryInfo.deliverable" class="text-brand text-sm">
+          {{ deliveryInfo.message }}
+        </p>
+
+        <p class="text-caption mt-3 font-bold">100% Original Products</p>
+      </div>
+
+      <!-- Best Offers -->
+      <div>
+        <h3 class="heading-section mb-3">BEST OFFERS</h3>
+        <div class="text-subheading text-sm space-y-2">
+          <p>• Best Price: Rs. {{ product.price - 50 }} (Apply coupon on checkout)</p>
+          <p>• 10% Instant Discount on HDFC Bank Credit Card</p>
+          <p>• Use coupon SAVE500, MYNTRA300, or FLAT10 at checkout</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-address-modal
+  [(show)]="showAddressModal"
+  (addressSelected)="onAddressSelected($event)"
+  (deliveryChecked)="onDeliveryChecked($event)">
+</app-address-modal>

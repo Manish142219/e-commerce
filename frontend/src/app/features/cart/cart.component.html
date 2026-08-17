@@ -1,0 +1,157 @@
+<app-header></app-header>
+
+<div class="max-w-[1400px] mx-auto px-4 md:px-10 py-6">
+  <!-- Checkout Stepper -->
+  <div class="flex items-center justify-center gap-4 mb-8 text-sm font-bold">
+    <span class="stepper-active border-b-2 pb-1">BAG</span>
+    <span class="text-caption">────────</span>
+    <span class="text-caption">ADDRESS</span>
+    <span class="text-caption">────────</span>
+    <span class="text-caption">PAYMENT</span>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-20 text-caption">Loading cart...</div>
+
+  <div *ngIf="!loading && cart" class="flex flex-col lg:flex-row gap-6">
+    <!-- Left Column -->
+    <div class="flex-1">
+      <!-- Delivery Address -->
+      <div class="bg-brand-light border border-[var(--color-border)] p-4 mb-4 flex justify-between items-center">
+        <div>
+          <p class="text-sm">Deliver to: <strong>{{ deliveryDisplay }}</strong></p>
+          <p class="text-caption mt-1">{{ deliveryAddressLine }}</p>
+        </div>
+        <button (click)="showAddressModal = true" class="btn-secondary">
+          CHANGE ADDRESS
+        </button>
+      </div>
+
+      <!-- Items Header -->
+      <div *ngIf="cart.items.length > 0" class="flex items-center justify-between border-b border-[var(--color-border)] pb-3 mb-4 text-sm font-bold">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" [checked]="allSelected" (change)="toggleAllSelection()" />
+          {{ cart.selectedItemCount }}/{{ cart.itemCount }} ITEMS SELECTED
+        </label>
+      </div>
+
+      <!-- Cart Items -->
+      <div *ngFor="let item of cart.items" class="card p-4 mb-4 relative">
+        <button (click)="removeItem(item.id)" class="absolute top-3 right-3 text-caption hover:text-brand text-xl">&times;</button>
+
+        <div class="flex gap-4">
+          <input type="checkbox" [checked]="item.selected"
+                 (change)="toggleItemSelection(item.id, $any($event.target).checked)"
+                 class="mt-2" />
+          <img [src]="item.imageUrl" [alt]="item.name" class="w-28 h-36 object-cover" />
+          <div class="flex-1">
+            <h3 class="font-bold text-sm">{{ item.brand }}</h3>
+            <p class="text-subheading">{{ item.name }}</p>
+            <p class="text-caption mt-1">Sold by: ShopEase Retail</p>
+
+            <div class="flex gap-4 mt-3">
+              <div>
+                <label class="text-label">Size</label>
+                <select class="input-field py-1 mt-1 w-20">
+                  <option>{{ item.size }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-label">Qty</label>
+                <select class="input-field py-1 mt-1 w-20"
+                        [ngModel]="item.quantity" (ngModelChange)="updateQuantity(item.id, $event)">
+                  <option *ngFor="let q of [1,2,3,4,5]" [value]="q">{{ q }}</option>
+                </select>
+              </div>
+            </div>
+
+            <p *ngIf="item.stockQuantity <= 5" class="text-discount text-xs font-bold mt-2">
+              {{ item.stockQuantity }} left
+            </p>
+
+            <div class="flex items-baseline gap-2 mt-3">
+              <span class="font-bold">₹{{ item.price * item.quantity }}</span>
+              <span class="text-caption line-through">₹{{ item.mrp * item.quantity }}</span>
+              <span class="text-success text-xs font-bold">₹{{ (item.mrp - item.price) * item.quantity }} OFF</span>
+            </div>
+
+            <p class="text-caption mt-2">14 days return available</p>
+            <p class="text-caption" *ngIf="item.estimatedDeliveryDate">
+              Delivery by <strong>{{ item.estimatedDeliveryDate }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="cart.items.length === 0" class="text-center py-20">
+        <p class="text-subheading mb-4">Your bag is empty</p>
+        <a routerLink="/home" class="btn-primary inline-block">Continue Shopping</a>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="lg:w-96 flex-shrink-0" *ngIf="cart.items.length > 0">
+      <div class="card p-4 sticky top-24">
+        <!-- Coupons -->
+        <h3 class="heading-section mb-4">COUPONS</h3>
+        <div *ngIf="!cart.appliedCouponCode" class="flex gap-2 mb-4">
+          <input type="text" [(ngModel)]="couponCode" placeholder="Enter coupon code"
+                 class="input-field flex-1" />
+          <button (click)="applyCoupon()" class="btn-primary px-4 py-2">APPLY</button>
+        </div>
+        <div *ngIf="cart.appliedCouponCode" class="bg-brand-light p-3 mb-4 flex justify-between items-center">
+          <div>
+            <span class="text-success font-bold text-sm">{{ cart.appliedCouponCode }} applied</span>
+            <p class="text-caption">Saving ₹{{ cart.couponDiscount }}</p>
+          </div>
+          <button (click)="removeCoupon()" class="text-brand text-sm font-bold">REMOVE</button>
+        </div>
+        <p *ngIf="couponMessage" class="text-sm mb-4" [class.text-success]="!couponError" [class.text-brand]="couponError">
+          {{ couponMessage }}
+        </p>
+        <p class="text-caption mb-4">Try: SAVE500, MYNTRA300, FLAT10</p>
+
+        <h3 class="heading-section mb-4">PRICE DETAILS ({{ cart.selectedItemCount }} Items)</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Total MRP</span>
+            <span>₹{{ cart.totalMrp }}</span>
+          </div>
+          <div class="flex justify-between text-success">
+            <span>Discount on MRP</span>
+            <span>-₹{{ cart.totalDiscount }}</span>
+          </div>
+          <div class="flex justify-between text-success" *ngIf="cart.couponDiscount > 0">
+            <span>Coupon Discount</span>
+            <span>-₹{{ cart.couponDiscount }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Platform Fee</span>
+            <span>₹{{ cart.platformFee }}</span>
+          </div>
+        </div>
+
+        <hr class="my-4 border-[var(--color-border)]" />
+
+        <div class="flex justify-between font-bold text-lg mb-6">
+          <span>Total Amount</span>
+          <span>₹{{ cart.totalAmount }}</span>
+        </div>
+
+        <button (click)="placeOrder()" [disabled]="cart.selectedItemCount === 0"
+                class="btn-primary w-full text-center disabled:opacity-50">
+          PLACE ORDER
+        </button>
+
+        <div class="flex justify-center gap-4 mt-4 text-caption">
+          <a class="hover:underline cursor-pointer">Terms of Use</a>
+          <a class="hover:underline cursor-pointer">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-address-modal
+  [(show)]="showAddressModal"
+  (addressSelected)="onAddressSelected($event)">
+</app-address-modal>

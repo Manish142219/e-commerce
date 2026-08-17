@@ -1,0 +1,89 @@
+<div *ngIf="show" class="modal-overlay" (click)="close()">
+  <div class="modal-content p-6" (click)="$event.stopPropagation()">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="heading-secondary text-lg">Use pincode to check delivery info</h2>
+      <button (click)="close()" class="text-2xl text-brand leading-none">&times;</button>
+    </div>
+
+    <!-- Pincode Check -->
+    <div class="flex border border-[var(--color-border)] mb-6">
+      <input type="text" [(ngModel)]="pincodeInput" maxlength="6"
+             placeholder="Enter a PIN code"
+             class="input-field border-0 flex-1" />
+      <button (click)="checkPincode()" [disabled]="checkingPincode"
+              class="px-6 font-bold text-brand disabled:opacity-50">
+        {{ checkingPincode ? '...' : 'CHECK' }}
+      </button>
+    </div>
+
+    <p *ngIf="pincodeError" class="text-brand text-sm mb-4">{{ pincodeError }}</p>
+
+    <div *ngIf="deliveryInfo?.deliverable" class="bg-brand-light p-3 mb-4 text-sm rounded-sm">
+      <p class="text-success font-bold">✓ Delivery available</p>
+      <p class="text-caption mt-1">Get it by {{ deliveryInfo?.estimatedDeliveryDate }}</p>
+      <p class="text-caption" *ngIf="deliveryInfo?.codAvailable">Pay on delivery available</p>
+    </div>
+
+    <div class="flex items-center gap-4 mb-6">
+      <hr class="flex-1 border-[var(--color-border)]" />
+      <span class="text-caption font-bold">OR</span>
+      <hr class="flex-1 border-[var(--color-border)]" />
+    </div>
+
+    <p class="text-subheading mb-4">Select a saved address to check delivery info</p>
+
+    <div *ngIf="loadingAddresses" class="text-center py-4 text-caption">Loading addresses...</div>
+
+    <div *ngFor="let addr of addresses" (click)="selectAddress(addr)"
+         class="border border-[var(--color-border)] p-4 mb-3 cursor-pointer hover:border-brand flex justify-between items-start">
+      <div>
+        <p class="font-bold text-sm">
+          {{ addr.name }}, {{ addr.pincode }}
+          <span class="ml-2 text-caption bg-[var(--color-bg-page)] px-2 py-0.5 rounded">{{ addr.label }}</span>
+        </p>
+        <p class="text-caption mt-1">{{ addr.addressLine }}</p>
+        <p class="text-caption">{{ addr.city }}, {{ addr.state }}</p>
+      </div>
+      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+           [class.border-brand]="addr.isDefault"
+           [class.bg-brand]="addr.isDefault"
+           [class.border-gray-300]="!addr.isDefault">
+        <span *ngIf="addr.isDefault" class="text-white text-xs">✓</span>
+      </div>
+    </div>
+
+    <p *ngIf="!loadingAddresses && addresses.length === 0" class="text-caption text-center py-4">
+      No saved addresses yet
+    </p>
+
+    <!-- Add New Address -->
+    <button *ngIf="!showAddForm" (click)="openAddForm()"
+            class="btn-secondary w-full mt-2">
+      + ADD NEW ADDRESS
+    </button>
+
+    <div *ngIf="showAddForm" class="mt-4 border-t pt-4">
+      <h3 class="heading-section mb-4">Add New Address</h3>
+      <div class="space-y-3">
+        <input type="text" [(ngModel)]="newAddress.name" placeholder="Full Name" class="input-field" />
+        <input type="tel" [(ngModel)]="newAddress.phone" placeholder="Phone (10 digits)" maxlength="10" class="input-field" />
+        <input type="text" [(ngModel)]="newAddress.pincode" placeholder="Pincode" maxlength="6" class="input-field" />
+        <input type="text" [(ngModel)]="newAddress.addressLine" placeholder="Address Line" class="input-field" />
+        <div class="flex gap-3">
+          <input type="text" [(ngModel)]="newAddress.city" placeholder="City" class="input-field" />
+          <input type="text" [(ngModel)]="newAddress.state" placeholder="State" class="input-field" />
+        </div>
+        <select [(ngModel)]="newAddress.label" class="input-field">
+          <option value="HOME">HOME</option>
+          <option value="WORK">WORK</option>
+          <option value="OTHER">OTHER</option>
+        </select>
+      </div>
+      <p *ngIf="formError" class="text-brand text-sm mt-2">{{ formError }}</p>
+      <button (click)="saveNewAddress()" [disabled]="savingAddress"
+              class="btn-primary w-full mt-4 text-center">
+        {{ savingAddress ? 'SAVING...' : 'SAVE ADDRESS' }}
+      </button>
+    </div>
+  </div>
+</div>

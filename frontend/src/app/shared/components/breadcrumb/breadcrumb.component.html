@@ -1,0 +1,7 @@
+<nav class="text-xs text-myntra-gray py-3 px-4 md:px-10 bg-white">
+  <ng-container *ngFor="let item of items; let last = last">
+    <a *ngIf="item.link && !last" [routerLink]="item.link" class="hover:text-myntra-dark">{{ item.label }}</a>
+    <span *ngIf="!item.link || last" [class.font-bold]="last" [class.text-myntra-dark]="last">{{ item.label }}</span>
+    <span *ngIf="!last" class="mx-1">/</span>
+  </ng-container>
+</nav>

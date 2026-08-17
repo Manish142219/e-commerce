@@ -1,0 +1,21 @@
+<a [routerLink]="['/product', product.id]" class="block cursor-pointer group">
+  <div class="relative mb-2 overflow-hidden">
+    <img [src]="product.imageUrl" [alt]="product.name"
+         class="w-full aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-300" />
+    <div *ngIf="product.rating" class="absolute bottom-2 left-2 bg-white/90 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+      <span>{{ product.rating }}</span>
+      <span class="text-yellow-500">★</span>
+      <span class="text-myntra-gray font-normal">| {{ product.ratingCount }}</span>
+    </div>
+  </div>
+  <h3 class="font-bold text-sm text-myntra-dark truncate">{{ product.brand }}</h3>
+  <p class="text-sm text-myntra-gray truncate">{{ product.name }}</p>
+  <div class="flex items-center gap-2 mt-1">
+    <span class="font-bold text-sm">Rs. {{ product.price }}</span>
+    <span class="text-xs text-myntra-gray line-through">Rs. {{ product.mrp }}</span>
+    <span class="text-xs text-myntra-orange font-bold">({{ product.discountPercent }}% OFF)</span>
+  </div>
+  <p *ngIf="product.stockQuantity && product.stockQuantity <= 5" class="text-xs text-myntra-pink font-bold mt-1">
+    Only Few Left!
+  </p>
+</a>

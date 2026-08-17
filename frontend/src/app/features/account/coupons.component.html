@@ -1,0 +1,12 @@
+<app-header></app-header>
+<div class="max-w-[700px] mx-auto px-4 py-8">
+  <h1 class="heading-secondary mb-6">Coupons & Gift Cards</h1>
+  <div *ngFor="let c of coupons" class="card p-4 mb-3 flex justify-between items-center">
+    <div>
+      <p class="font-bold text-brand">{{ c.code }}</p>
+      <p class="text-caption mt-1">{{ c.desc }}</p>
+    </div>
+    <span class="text-caption">Apply in Bag</span>
+  </div>
+  <p class="text-subheading mt-6">Gift Cards feature coming soon.</p>
+</div>

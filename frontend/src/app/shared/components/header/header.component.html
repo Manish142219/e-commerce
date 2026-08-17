@@ -1,0 +1,142 @@
+<header class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="max-w-[1400px] mx-auto px-4 flex items-center h-[80px] gap-6">
+    <!-- Logo -->
+    <a routerLink="/home" class="flex-shrink-0">
+      <svg width="56" height="40" viewBox="0 0 56 40" fill="none">
+        <path d="M28 0L0 40H16L28 20L40 40H56L28 0Z" fill="url(#logoGrad)"/>
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="56" y2="40">
+            <stop stop-color="#FF3F6C"/>
+            <stop offset="1" stop-color="#FF905A"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="hidden lg:flex items-center gap-5 flex-shrink-0 relative"
+         (mouseleave)="onNavLeave()">
+      <div *ngFor="let section of navSections" class="relative py-6"
+           (mouseenter)="onNavHover(section)">
+        <a class="nav-link cursor-pointer"
+           [class.active]="activeSection === section"
+           (click)="openCategory(section === 'BEAUTY' ? 'beauty-products' : (section === 'MEN' ? 'casual-wear' : (section === 'WOMEN' ? 'western-wear' : 'casual-wear')))">
+          {{ section }}
+          <sup *ngIf="section === 'STUDIO'" class="text-brand text-[10px] ml-0.5">NEW</sup>
+        </a>
+      </div>
+
+      <!-- Mega Menu -->
+      <div *ngIf="showMegaMenu && megaMenu"
+           class="absolute top-full left-0 min-w-[980px] max-w-[1100px] bg-white shadow-2xl border border-gray-100 z-50"
+           (mouseenter)="showMegaMenu = true"
+           (mouseleave)="onNavLeave()">
+        <div class="flex">
+          <!-- Left: Shop by Category cards/list -->
+          <div class="w-56 bg-[var(--color-bg-page)] p-5 border-r border-[var(--color-border)]"
+               *ngIf="megaMenu.categories?.length">
+            <h4 class="text-label mb-3">SHOP BY CATEGORY</h4>
+            <button *ngFor="let cat of megaMenu.categories"
+                    type="button"
+                    (click)="openCategory(cat.slug)"
+                    class="w-full text-left mb-3 group">
+              <p class="text-sm font-bold group-hover:text-brand">{{ cat.name }}</p>
+              <p class="text-caption" *ngIf="cat.discountText">{{ cat.discountText }}</p>
+            </button>
+          </div>
+
+          <!-- Right: Column links like Myntra -->
+          <div class="flex-1 p-6 grid gap-6"
+               [class.grid-cols-4]="getColumnKeys().length >= 4"
+               [class.grid-cols-3]="getColumnKeys().length === 3"
+               [class.grid-cols-2]="getColumnKeys().length === 2"
+               [class.grid-cols-1]="getColumnKeys().length <= 1">
+            <div *ngFor="let col of getColumnKeys()">
+              <div *ngFor="let group of megaMenu.columns[col]" class="mb-5">
+                <h4 class="text-brand font-bold text-sm mb-2">{{ group.title }}</h4>
+                <ul>
+                  <li *ngFor="let link of group.links" class="mb-1.5">
+                    <button type="button"
+                            (click)="openNavLink(link)"
+                            class="text-sm text-[var(--color-text-body)] hover:text-brand hover:font-bold text-left">
+                      {{ link.name }}
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Search Bar -->
+    <div class="flex-1 max-w-xl mx-auto">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-myntra-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()"
+               placeholder="Search for products, brands and more"
+               class="w-full bg-myntra-light pl-10 pr-4 py-2.5 text-sm rounded-sm outline-none focus:ring-1 focus:ring-myntra-pink" />
+      </div>
+    </div>
+
+    <!-- User Actions -->
+    <div class="flex items-center gap-6 flex-shrink-0">
+      <div class="relative"
+           (mouseenter)="onProfileEnter()"
+           (mouseleave)="onProfileLeave()">
+        <div class="flex flex-col items-center cursor-pointer group">
+          <svg class="w-5 h-5 text-myntra-dark group-hover:text-myntra-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span class="text-xs font-bold mt-0.5">Profile</span>
+        </div>
+
+        <div *ngIf="showProfileMenu" class="absolute right-0 top-full pt-2 z-50 w-64">
+          <div class="bg-white shadow-xl border border-gray-100 text-sm">
+            <div class="px-4 py-3 border-b border-gray-100">
+              <p class="font-bold">Hello {{ userName || 'User' }}</p>
+              <p class="text-caption mt-0.5 truncate">{{ authService.getCurrentUser()?.email }}</p>
+            </div>
+            <div class="py-2 border-b border-gray-100">
+              <button (click)="navigateAndClose('/orders')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Orders</button>
+              <button (click)="navigateAndClose('/wishlist')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Wishlist</button>
+              <button (click)="navigateAndClose('/coupons')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Gift Cards</button>
+              <button (click)="navigateAndClose('/contact')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Contact Us</button>
+              <button (click)="navigateAndClose('/profile')" class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2">
+                ShopEase Insider <span class="text-[10px] text-brand font-bold">New</span>
+              </button>
+            </div>
+            <div class="py-2 border-b border-gray-100">
+              <button (click)="navigateAndClose('/coupons')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Coupons</button>
+              <button (click)="navigateAndClose('/addresses')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Saved Addresses</button>
+              <button (click)="navigateAndClose('/profile')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Saved Cards</button>
+            </div>
+            <div class="py-2">
+              <button (click)="navigateAndClose('/profile')" class="w-full text-left px-4 py-2 hover:bg-gray-50">Edit Profile</button>
+              <button (click)="logout()" class="w-full text-left px-4 py-2 hover:bg-gray-50 font-bold">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center cursor-pointer group relative" routerLink="/wishlist">
+        <svg class="w-5 h-5 text-myntra-dark group-hover:text-myntra-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+        <span class="text-xs font-bold mt-0.5">Wishlist</span>
+        <span *ngIf="wishlistCount > 0" class="absolute -top-1 -right-1 bg-myntra-pink text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{{ wishlistCount }}</span>
+      </div>
+
+      <div class="flex flex-col items-center cursor-pointer group relative" routerLink="/cart">
+        <svg class="w-5 h-5 text-myntra-dark group-hover:text-myntra-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        <span class="text-xs font-bold mt-0.5">Bag</span>
+        <span *ngIf="cartCount > 0" class="absolute -top-1 -right-1 bg-myntra-pink text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{{ cartCount }}</span>
+      </div>
+    </div>
+  </div>
+</header>

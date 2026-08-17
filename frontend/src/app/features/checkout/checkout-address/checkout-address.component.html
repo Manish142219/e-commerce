@@ -1,0 +1,131 @@
+<app-header></app-header>
+
+<div class="max-w-[1200px] mx-auto px-4 md:px-10 py-6">
+  <!-- Stepper -->
+  <div class="flex items-center justify-center gap-4 mb-8 text-sm font-bold">
+    <span class="text-success">BAG</span>
+    <span class="text-success">────────</span>
+    <span class="stepper-active border-b-2 pb-1">ADDRESS</span>
+    <span class="text-caption">────────</span>
+    <span class="text-caption">PAYMENT</span>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-20 text-caption">Loading...</div>
+
+  <div *ngIf="!loading" class="flex flex-col lg:flex-row gap-6">
+    <!-- Left: Address Selection -->
+    <div class="flex-1">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="heading-secondary">Select Delivery Address</h1>
+        <button (click)="showAddForm = !showAddForm" class="btn-secondary">
+          ADD NEW ADDRESS
+        </button>
+      </div>
+
+      <!-- Inline Add Form -->
+      <div *ngIf="showAddForm" class="card p-4 mb-6">
+        <h3 class="heading-section mb-4">New Address</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input type="text" [(ngModel)]="newAddress.name" placeholder="Full Name" class="input-field" />
+          <input type="tel" [(ngModel)]="newAddress.phone" placeholder="Phone" maxlength="10" class="input-field" />
+          <input type="text" [(ngModel)]="newAddress.pincode" placeholder="Pincode" maxlength="6" class="input-field" />
+          <input type="text" [(ngModel)]="newAddress.addressLine" placeholder="Address" class="input-field md:col-span-2" />
+          <input type="text" [(ngModel)]="newAddress.city" placeholder="City" class="input-field" />
+          <input type="text" [(ngModel)]="newAddress.state" placeholder="State" class="input-field" />
+        </div>
+        <button (click)="saveNewAddress()" class="btn-primary mt-4">SAVE ADDRESS</button>
+      </div>
+
+      <!-- Default Addresses -->
+      <div *ngIf="defaultAddresses.length">
+        <h3 class="text-label mb-3">DEFAULT ADDRESS</h3>
+        <div *ngFor="let addr of defaultAddresses"
+             (click)="selectAddress(addr.id)"
+             class="card p-4 mb-3 cursor-pointer flex gap-4"
+             [class.border-brand]="selectedAddressId === addr.id"
+             [style.border-width]="selectedAddressId === addr.id ? '2px' : '1px'">
+          <input type="radio" [checked]="selectedAddressId === addr.id" class="mt-1" />
+          <div>
+            <p class="font-bold text-sm">
+              {{ addr.name }}
+              <span class="text-caption bg-[var(--color-bg-page)] px-2 py-0.5 rounded ml-2">{{ addr.label }}</span>
+            </p>
+            <p class="text-caption mt-1">{{ addr.addressLine }}</p>
+            <p class="text-caption">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+            <p class="text-caption mt-1">Mobile: {{ addr.phone }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other Addresses -->
+      <div *ngIf="otherAddresses.length">
+        <h3 class="text-label mb-3 mt-4">OTHER ADDRESS</h3>
+        <div *ngFor="let addr of otherAddresses"
+             (click)="selectAddress(addr.id)"
+             class="card p-4 mb-3 cursor-pointer flex gap-4"
+             [class.border-brand]="selectedAddressId === addr.id"
+             [style.border-width]="selectedAddressId === addr.id ? '2px' : '1px'">
+          <input type="radio" [checked]="selectedAddressId === addr.id" class="mt-1" />
+          <div>
+            <p class="font-bold text-sm">
+              {{ addr.name }}
+              <span class="text-caption bg-[var(--color-bg-page)] px-2 py-0.5 rounded ml-2">{{ addr.label }}</span>
+            </p>
+            <p class="text-caption mt-1">{{ addr.addressLine }}</p>
+            <p class="text-caption">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+            <p class="text-caption mt-1">Mobile: {{ addr.phone }}</p>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="addresses.length === 0" class="text-subheading text-center py-10">
+        No addresses saved. Click "ADD NEW ADDRESS" to add one.
+      </p>
+    </div>
+
+    <!-- Right: Order Summary -->
+    <div class="lg:w-80 flex-shrink-0" *ngIf="cart">
+      <div class="card p-4 sticky top-24">
+        <div *ngIf="cart.items.length" class="flex gap-3 mb-4 pb-4 border-b border-[var(--color-border)]">
+          <img [src]="cart.items[0].imageUrl" class="w-12 h-12 object-cover" />
+          <p class="text-sm">
+            Estimated delivery by
+            <strong>{{ cart.items[0].estimatedDeliveryDate || 'TBD' }}</strong>
+          </p>
+        </div>
+
+        <h3 class="heading-section mb-4">PRICE DETAILS ({{ cart.selectedItemCount }} Items)</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span>Total MRP</span><span>₹{{ cart.totalMrp }}</span></div>
+          <div class="flex justify-between text-success"><span>Discount on MRP</span><span>-₹{{ cart.totalDiscount }}</span></div>
+          <div class="flex justify-between text-success" *ngIf="cart.couponDiscount > 0">
+            <span>Coupon Discount</span><span>-₹{{ cart.couponDiscount }}</span>
+          </div>
+          <div class="flex justify-between"><span>Platform Fee</span><span>₹{{ cart.platformFee }}</span></div>
+        </div>
+
+        <hr class="my-4 border-[var(--color-border)]" />
+
+        <div class="flex justify-between font-bold text-lg mb-4">
+          <span>Total Amount</span>
+          <span>₹{{ cart.totalAmount }}</span>
+        </div>
+
+        <button (click)="continueToPayment()"
+                [disabled]="!selectedAddressId || placing"
+                class="btn-primary w-full text-center disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ placing ? 'PLACING ORDER...' : 'CONTINUE' }}
+        </button>
+
+        <p *ngIf="errorMessage" class="text-brand text-sm text-center mt-3">{{ errorMessage }}</p>
+        <p *ngIf="successMessage" class="text-success text-sm text-center mt-3">{{ successMessage }}</p>
+        <button (click)="goBack()" class="text-brand text-sm font-bold w-full mt-3">← Back to Bag</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-address-modal
+  [(show)]="showAddressModal"
+  (addressSelected)="onAddressSelected($event)">
+</app-address-modal>

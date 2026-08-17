@@ -1,0 +1,17 @@
+<app-header></app-header>
+
+<div class="max-w-[1400px] mx-auto px-4 md:px-10 py-8">
+  <h1 class="text-xl font-bold text-myntra-dark mb-6">
+    Search results for "{{ query }}" - {{ products.length }} items
+  </h1>
+
+  <div *ngIf="loading" class="text-center py-20 text-myntra-gray">Searching...</div>
+
+  <div *ngIf="!loading && products.length === 0" class="text-center py-20 text-myntra-gray">
+    No products found for "{{ query }}"
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+  </div>
+</div>

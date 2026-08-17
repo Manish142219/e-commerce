@@ -1,0 +1,44 @@
+<app-header></app-header>
+
+<div class="max-w-[800px] mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="heading-secondary">Saved Addresses</h1>
+    <button (click)="showForm = !showForm" class="btn-secondary">ADD NEW ADDRESS</button>
+  </div>
+
+  <div *ngIf="showForm" class="card p-4 mb-6 space-y-3">
+    <input class="input-field" placeholder="Full Name" [(ngModel)]="newAddress.name" />
+    <input class="input-field" placeholder="Phone" [(ngModel)]="newAddress.phone" maxlength="10" />
+    <input class="input-field" placeholder="Pincode" [(ngModel)]="newAddress.pincode" maxlength="6" />
+    <input class="input-field" placeholder="Address" [(ngModel)]="newAddress.addressLine" />
+    <div class="flex gap-3">
+      <input class="input-field" placeholder="City" [(ngModel)]="newAddress.city" />
+      <input class="input-field" placeholder="State" [(ngModel)]="newAddress.state" />
+    </div>
+    <p *ngIf="formError" class="text-brand text-sm">{{ formError }}</p>
+    <button (click)="save()" class="btn-primary">SAVE ADDRESS</button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-10 text-caption">Loading...</div>
+
+  <div *ngFor="let addr of addresses" class="card p-4 mb-3">
+    <div class="flex justify-between">
+      <div>
+        <p class="font-bold text-sm">
+          {{ addr.name }}
+          <span class="text-caption bg-[var(--color-bg-page)] px-2 py-0.5 rounded ml-2">{{ addr.label }}</span>
+          <span *ngIf="addr.isDefault" class="text-success text-xs ml-2">DEFAULT</span>
+        </p>
+        <p class="text-caption mt-1">{{ addr.addressLine }}</p>
+        <p class="text-caption">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+        <p class="text-caption">Mobile: {{ addr.phone }}</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button *ngIf="!addr.isDefault" (click)="setDefault(addr.id)" class="text-brand text-xs font-bold">MAKE DEFAULT</button>
+        <button (click)="remove(addr.id)" class="text-caption text-xs hover:text-brand">REMOVE</button>
+      </div>
+    </div>
+  </div>
+
+  <p *ngIf="!loading && addresses.length === 0" class="text-subheading text-center py-10">No saved addresses</p>
+</div>

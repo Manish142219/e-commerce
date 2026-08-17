@@ -1,0 +1,54 @@
+<div class="min-h-screen bg-myntra-light flex items-center justify-center px-4">
+  <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+    <div class="text-center mb-8">
+      <svg class="mx-auto mb-4" width="56" height="40" viewBox="0 0 56 40" fill="none">
+        <path d="M28 0L0 40H16L28 20L40 40H56L28 0Z" fill="url(#regGrad)"/>
+        <defs>
+          <linearGradient id="regGrad" x1="0" y1="0" x2="56" y2="40">
+            <stop stop-color="#FF3F6C"/><stop offset="1" stop-color="#FF905A"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <h1 class="text-2xl font-bold text-myntra-dark">Create Account</h1>
+      <p class="text-myntra-gray text-sm mt-1">Join ShopEase today</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="mb-4">
+        <label class="block text-sm font-bold text-myntra-gray mb-1">Full Name</label>
+        <input type="text" formControlName="name" placeholder="Enter your name"
+               class="w-full border border-gray-300 rounded-sm px-4 py-3 text-sm outline-none focus:border-myntra-pink" />
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-bold text-myntra-gray mb-1">Email</label>
+        <input type="email" formControlName="email" placeholder="Enter your email"
+               class="w-full border border-gray-300 rounded-sm px-4 py-3 text-sm outline-none focus:border-myntra-pink" />
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-bold text-myntra-gray mb-1">Phone (Optional)</label>
+        <input type="tel" formControlName="phone" placeholder="Enter phone number"
+               class="w-full border border-gray-300 rounded-sm px-4 py-3 text-sm outline-none focus:border-myntra-pink" />
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-myntra-gray mb-1">Password</label>
+        <input type="password" formControlName="password" placeholder="Min 6 characters"
+               class="w-full border border-gray-300 rounded-sm px-4 py-3 text-sm outline-none focus:border-myntra-pink" />
+      </div>
+
+      <p *ngIf="errorMessage" class="text-myntra-pink text-sm mb-4 text-center">{{ errorMessage }}</p>
+
+      <button type="submit" [disabled]="loading || registerForm.invalid"
+              class="myntra-btn w-full text-center disabled:opacity-50">
+        {{ loading ? 'Creating Account...' : 'REGISTER' }}
+      </button>
+    </form>
+
+    <p class="text-center text-sm text-myntra-gray mt-6">
+      Already have an account?
+      <a routerLink="/login" class="text-myntra-pink font-bold hover:underline">Login</a>
+    </p>
+  </div>
+</div>
